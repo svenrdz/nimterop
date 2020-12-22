@@ -273,7 +273,8 @@ proc newXIdent(gState: State, node: TSNode, kind = nskType, fname = "", pragmas:
   if name.Bl:
     # Name skipped or overridden since blank
     result = gState.getOverrideOrSkip(node, origname, kind)
-  elif name notin gTypeMapValues and gState.addNewIdentifer(name):
+  elif name notin gTypeMapValues and gState.addNewIdentifer(name,
+      origname = origname):
     # Add only if not an existing Nim type
 
     if kind == nskType:
@@ -389,7 +390,7 @@ proc newXIdent(gState: State, node: TSNode, kind = nskType, fname = "", pragmas:
       # No pragmas here since proc pragmas are elsewhere in the AST
       result = ident
 
-    gState.identifierNodes[name] = result
+    gState.identifierNodes[origname] = result
   else:
     decho &"{getKeyword(kind)} '{origname}' is duplicate, skipped"
 
@@ -922,9 +923,9 @@ proc addTypeObject(gState: State, node: TSNode, typeDef: PNode = nil, fname = ""
           else:
             ""
 
-      if name.nBl and gState.identifierNodes.hasKey(name):
+      if name.nBl and gState.identifierNodes.hasKey(origname):
         let
-          def = gState.identifierNodes[name]
+          def = gState.identifierNodes[origname]
         def.comment = gState.getCommentsStr(commentNodes)
 
         # Duplicate nkTypeDef for `name` with empty fields

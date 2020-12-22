@@ -236,12 +236,15 @@ proc getUniqueIdentifier*(gState: State, prefix = ""): string =
 
   return name & $count
 
-proc addNewIdentifer*(gState: State, name: string, override = false): bool =
+proc addNewIdentifer*(gState: State, name: string, origname = "",
+    override = false): bool =
   if override or name notin gState.symOverride:
     let
       nimName = name[0] & name[1 .. ^1].replace("_", "").toLowerAscii
 
-    if gState.identifiers.hasKey(nimName):
+    if origname != "" and not gState.identifierNodes.hasKey(origname):
+      result = true
+    elif gState.identifiers.hasKey(nimName):
       doAssert name == gState.identifiers[nimName],
         &"Identifier '{name}' is a stylistic duplicate of identifier " &
         &"'{gState.identifiers[nimName]}', use 'cPlugin:onSymbol()' to rename"
